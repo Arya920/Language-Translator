@@ -2,6 +2,9 @@
 
 This project is a Flask-based web application that translates text from one language to another using a pre-trained machine translation model (NLLB-200). The application provides a user-friendly interface for selecting languages and entering text, and it returns the translated output along with the computation time.
 
+![Flask App](images/flask_app.png)
+
+
 ## Overview
 
 The application allows users to translate text by:
