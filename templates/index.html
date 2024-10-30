@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Language Translation App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Language Translator</h1>
+        <form id="translate_form" method="POST" action="/translate">
+            <textarea name="input_text" id="input_text" rows="5" cols="50" placeholder="Enter your text here..."></textarea>
+            <div class="language-selection">
+                <div>
+                    <label for="input_language">Input Language:</label>
+                    <select name="input_language" id="input_language"></select>
+                </div>
+                <div>
+                    <label for="output_language">Output Language:</label>
+                    <select name="output_language" id="output_language"></select>
+                </div>
+            </div>
+            <button type="submit" id="translate_button">Translate</button>
+        </form>
+        <div id="spinner" style="display: none;">
+            <div class="loader"></div>
+            <p>Translating...</p>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Fetch available languages from the backend
+            $.ajax({
+                url: '/get_languages',
+                method: 'GET',
+                success: function(data) {
+                    const inputLanguageSelect = $('#input_language');
+                    const outputLanguageSelect = $('#output_language');
+                    
+                    $.each(data.languages, function(key, value) {
+                        inputLanguageSelect.append(`<option value="${key}">${value}</option>`);
+                        outputLanguageSelect.append(`<option value="${key}">${value}</option>`);
+                    });
+                }
+            });
+
+            // Handle form submission with AJAX
+            $('#translate_form').on('submit', function(event) {
+                event.preventDefault();
+                
+                const inputLanguage = $('#input_language').val();
+                const outputLanguage = $('#output_language').val();
+                const inputText = $('#input_text').val().trim();
+
+                // Show spinner
+                $('#spinner').show();
+                $('#result').empty();
+
+                $.ajax({
+                    url: '/translate',
+                    method: 'POST',
+                    data: {
+                        input_language: inputLanguage,
+                        output_language: outputLanguage,
+                        input_text: inputText
+                    },
+                    success: function(response) {
+                        $('#spinner').hide();
+                        $('#result').html(`<h3>Translated Text:</h3><p>${response.translated_text}</p><p><strong>Computation Time:</strong> ${response.computation_time} seconds</p>`);
+                    },
+                    error: function() {
+                        $('#spinner').hide();
+                        $('#result').html('<p style="color: red;">Error during translation. Please try again.</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
